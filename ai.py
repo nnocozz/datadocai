@@ -13,6 +13,7 @@ import re
 # =============================================================================
 # POPPLER PATH FIX
 # =============================================================================
+# Ensure that Poppler (required for pdf2image) is available locally.
 os.environ["PATH"] += os.pathsep + r"C:\Users\poppler-25.12.0\Library\bin"
 
 # =============================================================================
@@ -23,12 +24,11 @@ MODEL_FOLDER = r"C:\Users\gigabyte\AppData\Local\nomic.ai\GPT4All"
 
 print("Loading AI model...")
 try:
-    # Attempt to use GPU (CUDA mode)
+    # Attempt to use GPU (CUDA mode), fallback to CPU if unavailable
     model = GPT4All(MODEL_FILE, model_path=MODEL_FOLDER, allow_download=False, device="gpu")
     print("Model successfully loaded in GPU (CUDA) mode!\n")
 except Exception as e:
     print(f"GPU (CUDA) mode initialization failed ({e}). Falling back to CPU mode...")
-    # Fallback to CPU mode if GPU fails
     model = GPT4All(MODEL_FILE, model_path=MODEL_FOLDER, allow_download=False, device="cpu")
     print("Model successfully loaded in CPU mode!\n")
 
@@ -110,7 +110,6 @@ def ai_extract(text):
     Use the GPT4All model (loaded with CUDA/CPU fallback) to extract structured invoice data.
     """
     print("AI extracting data...")
-    
     prompt = f"""You are an invoice data extraction tool.
 Return ONLY this exact JSON format. No code, no explanation, no extra text.
 
@@ -234,9 +233,9 @@ def process_folder(folder_path, base_name, format_type):
 # COMMAND LINE
 # =============================================================================
 parser = argparse.ArgumentParser()
-parser.add_argument("--input", required=True)
-parser.add_argument("--format", default="excel", choices=["excel", "csv", "both"])
-parser.add_argument("--name", default="archive")
+parser.add_argument("--input", required=True, help="Path to the input file or folder.")
+parser.add_argument("--format", default="excel", choices=["excel", "csv", "both"], help="Output format (excel/csv). Default is 'excel'.")
+parser.add_argument("--name", default="archive", help="Base output file name. Default is 'archive'.")
 
 args = parser.parse_args()
 
